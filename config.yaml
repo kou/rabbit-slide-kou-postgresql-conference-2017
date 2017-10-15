@@ -1,0 +1,24 @@
+---
+id: postgresql-conference-2017
+base_name: pgroonga-2
+tags:
+- rabbit
+- postgresql
+- pgroonga
+- pgcon17j
+presentation_date: 2017-11-03
+version: 2017.11.3.0
+licenses:
+- CC BY-SA 4.0
+slideshare_id: 
+speaker_deck_id: 
+ustream_id: 
+vimeo_id: 
+youtube_id: 
+author:
+  markup_language: :rd
+  name: Kouhei Sutou
+  email: kou@clear-code.com
+  rubygems_user: kou
+  slideshare_user: kou
+  speaker_deck_user: 

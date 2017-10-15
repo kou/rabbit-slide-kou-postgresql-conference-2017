@@ -1,0 +1,25 @@
+= PGroonga 2
+
+: subtitle
+   PostgreSQLでの全文検索の決定版
+: author
+   須藤功平
+: institution
+   クリアコード
+: content-source
+   PostgreSQL Conference Japan 2017
+: date
+   2017-11-03
+: start-time
+   2017-11-03T16:10:00+0900
+: end-time
+   2017-11-03T17:00:00+0900
+: theme
+   .
+
+= 最初のスライド
+
+  * 項目1
+  * 項目2
+  * 項目3
+
