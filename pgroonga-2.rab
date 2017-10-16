@@ -17,9 +17,815 @@
 : theme
    .
 
-= 最初のスライド
+= 対象者
 
-  * 項目1
-  * 項目2
-  * 項目3
+  * PostgreSQLで全文検索したい
+  * 全文検索はよく知らない
+  * PGroongaは使ったことがない
 
+= 全文検索システム：対象
+
+(('tag:center'))
+(('tag:large'))
+(('tag:margin-bottom * 2'))
+大量のテキスト
+
+  * 例：Wikiのデータ
+  * 例：オフィス文書のテキスト
+  * 例：商品説明・口コミ
+  * 例：チャットログ
+
+= 全文検索システム：目的
+
+  * 必要な情報を
+  * 必要なときに
+  * 活用
+
+= 必要な情報を活用
+
+  * ×
+    * 探している情報が見つからない
+  * ○
+    * 探している情報が見つかる
+  * ◎
+    * 意識していなかったけど\n
+      ((*実は欲しかった*))情報も見つかる！
+
+= 必要なときに活用
+
+  * ×
+    * なかなか見つからない
+  * ○
+    * すぐに見つかる
+  * ◎
+    * すでに見つかっていた
+    * 例：レコメンデーション
+
+= 実装方法\n選択肢
+
+  * 全文検索サーバーを使う
+  * PostgreSQLを使う
+
+= 全文検索サーバー案\nメリット
+
+  * 必要な機能が揃っている
+  * +αの機能もある
+  * 速い
+
+= 全文検索サーバー案\nデメリット
+
+  * 実装コスト大
+    * それぞれ独自の使い方だから
+    * マスターデータの同期はどうする？
+  * メンテナンスコスト大
+    * それぞれ独自の仕組みだから
+
+= PostgreSQL案\nメリット
+
+  * 実装コスト小
+    * 新しく覚えることが少ない
+    * データの一元管理
+  * メンテナンスコスト小
+    * 既存の運用ノウハウを使える
+
+= PostgreSQL案\nデメリット
+
+  * 組込機能では機能不足
+  * SQLの表現力不足
+    * 1クエリーで実現できない機能アリ
+    * ↑は性能を出しにくい
+
+= 実現方法\n第3の選択肢
+
+  * PostgreSQL経由（SQL）で\n
+    全文検索エンジンを使う
+
+= メリット
+
+  * 高速で豊富な機能
+  * 実装コスト小
+  * メンテナンスコスト小
+
+= デメリット
+
+  * PostgreSQLに拡張機能が必要
+    * DBaaSで使えない
+
+= オススメの選択肢\n全文検索の知識ナシ
+
+  * まだ単純な機能で十分
+    * データ少：PostgreSQLでLIKE\n
+      (('note:（数十万件とか）'))
+  * いまどきの全文検索機能が必要
+    * PostgreSQL経由で全文検索エンジン
+
+= オススメの選択肢\n全文検索の知識アリ
+
+  * カリカリにチューニングしたい
+    * PostgreSQL＋全文検索サーバー
+  * それ以外
+    * PostgreSQL経由で全文検索エンジン
+
+= 説明する選択肢
+
+PostgreSQL経由で\n
+全文検索\n
+エンジン
+
+= 全文検索エンジン\nGroonga（ぐるんが）
+
+  * 組込可能な全文検索エンジン
+    * PostgreSQLに組込→PGoonga
+  * 全文検索サーバーとして\n
+    単独でも使用可能
+    * PostgreSQL＋全文検索サーバー構成\n
+      もできる
+
+= Groongaの得意なこと
+
+  * データの追加・更新
+    * 新鮮な情報をすぐに検索可能に！
+    * 更新中も検索性能を落とさない！
+  * 日本語
+    * 開発者が日本人
+    * 便利機能が組み込み
+
+= PGroonga\n（ぴーじーるんが）
+
+  * PostgreSQLのインデックス
+    * B-tree・GINなどと同じレイヤー
+  * 使用方法
+    * (({CREATE INDEX ...}))\n
+      (({USING PGroonga ...}))
+
+= PostgreSQLと全文検索
+
+  * LIKE：組込機能
+  * textsearch：組込機能
+  * pg_trgm：標準添付
+    * アーカイブには含まれている
+    * 別途インストールすれば使える
+
+= LIKEと速度
+
+  * 少ないデータ
+    * 十分実用的
+    * 400文字×20万件くらいなら1秒とか
+  * 少なくないデータ
+    * 性能問題アリ
+
+= LIKEと全文検索システム
+
+  * 👍速度が実用的なことも多い
+    * 少ないデータなら
+  * 👎それっぽい順のソート不可
+    * 全文検索ではソート順が重要
+    * ユーザーは先頭n件しか見ない
+
+= textsearch
+
+  * インデックスを作るので速い
+  * 言語毎にモジュールが必要
+    * 英語やフランス語などは組込
+    * 日本語は別途必要
+  * 日本語用モジュール
+    * 公式にはメンテナンスされていない\n
+      (('note:forkして動くようにしている人はいる'))
+
+= pg_trgm
+
+  * インデックスを作るので速い
+    * 注：ヒット件数が増えると遅い
+    * 注：テキスト量が多いと遅い
+    * 注：1,2文字の検索は遅い(('note:（米・日本）'))
+
+  * 日本語を使うにはひと工夫必要
+    * C.UTF-8を使う
+    * ソースを変更してビルド
+
+= プラグイン
+
+  * pg_bigm
+    * pg_trgmの日本語対応強化版
+    * それっぽい順のソート不可
+  * PGroonga
+    * 本気の全文検索エンジンを利用
+    * 速いし日本語もバッチリ！
+    * それっぽい順のソート可
+
+= ベンチマーク：pg_bigm
+
+  # image
+  # src = images/search-pg-bigm.pdf
+  # relative_height = 100
+
+= ベンチマーク：PGroonga
+
+  # image
+  # src = images/search-pgroonga-pg-bigm.pdf
+  # relative_height = 100
+
+= PostgreSQLで全文検索システム
+
+  * PostgreSQLで全文検索
+    * PGroongaがベスト！💯
+  * PGroonga
+    * 高速
+    * 日本語対応
+    * それっぽい順でソート可
+
+= 基本機能
+
+  * 高速全文検索＋ソート
+  * 検索キーワードハイライト
+  * キーワード周辺テキスト表示
+
+= 高度な機能
+
+  * オートコンプリート
+    * ローマ字対応（zen→全文検索）
+  * 類似文書検索
+  * 同義語展開
+    * 「牛乳」→\n
+      「牛乳 OR ミルク」
+
+= 高速全文検索＋ソート
+
+  # image
+  # src = images/php-document-search-search.png
+  # relative_height = 100
+
+= テーブル定義
+
+  # coderay sql
+
+  CREATE TABLE entries (
+    -- 主キーを用意する
+    -- それっぽい順でソートするために必要
+    id integer PRIMARY KEY,
+    title text,
+    content text
+  );
+
+= インデックス定義
+
+  # coderay sql
+
+  -- 全文検索用インデックス
+  -- よくわからないなら
+  -- デフォルトのまま使うこと！
+  CREATE INDEX entries_full_text_search
+    ON entries
+    --「USING PGroonga」=「PGroongaを使う」
+    -- 主キーはそれっぽい順ソートのため！
+    USING PGroonga (id, title, content);
+
+= データ挿入
+
+  # coderay sql
+
+  -- 普通に挿入するだけでよい
+  INSERT INTO entries
+    VALUES (1,
+            'Groongaで高速全文検索！',
+            '高速に全文検索したいですね！');
+
+= 全文検索
+
+  # coderay sql
+
+  SELECT title FROM entries
+    WHERE
+  -- &@~で全文検索
+  -- 「検索」と「高速」をAND検索
+      title &@~ '検索 高速' OR
+      content &@~ '検索 高速';
+
+= 全文検索：LIKE
+
+  # coderay sql
+
+  SELECT title FROM entries
+    WHERE
+  -- LIKEでもインデックスが効く
+  --＝アプリを書き換えずに高速化可能
+  -- ただし&@~より性能が落ちる
+      title LIKE '%検索%' OR
+      content LIKE '%検索%';
+
+= それっぽい順のソート
+
+  # coderay sql
+
+  SELECT
+      title,
+      -- pgroonga_score(テーブル名)で
+      -- それっぽさを数値で取得
+      pgroonga_score(entries) AS score
+    FROM entries
+    WHERE -- ...
+    -- それっぽさでソート
+    ORDER BY score DESC LIMIT 10;
+
+= キーワードハイライト
+
+  # image
+  # src = images/php-document-search-search.png
+  # relative_height = 100
+
+= HTML用にハイライト
+
+  # coderay sql
+
+  SELECT
+    pgroonga_highlight_html(
+      title,
+      -- クエリーから対象キーワードを抽出
+      pgroonga_query_extract_keywords('検索 高速'))
+    FROM entries
+    WHERE title &@~ '検索 高速' OR
+          content &@~ '検索 高速';
+
+= HTML用ハイライト結果例
+
+  # coderay html
+
+  <Groonga>で高速全文検索！
+  ↓
+  &lt;Groonga&gt;で ← タグをエスケープ
+  <span class="keyword">高速</span>
+  全文 ↑↓キーワードはclass付け
+  <span class="keyword">検索</span>！
+
+= 周辺テキスト
+
+  # image
+  # src = images/php-document-search-search.png
+  # relative_height = 100
+
+= HTML用に周辺テキスト取得
+
+  # coderay sql
+
+  SELECT
+    pgroonga_snippet_html(
+      content,
+      -- クエリーから対象キーワードを抽出
+      pgroonga_query_extract_keywords('検索 高速'))
+    FROM entries
+    WHERE title &@~ '検索 高速' OR
+          content &@~ '検索 高速';
+
+= HTML用周辺テキスト結果例
+
+  # coderay html
+
+  ...<Groonga>で高速全文検索！...
+  ↓
+  ARRAY[
+    ↓ 1つ目
+    'ga&gt;で ←タグをエスケープ
+     <span class="keyword">高速</span>
+     全文 ↑↓キーワードはclass付け
+     <span class="keyword">検索/span>！',
+    '...' ← 2つ目
+  ]
+
+= オートコンプリート
+
+  # image
+  # src = images/php-document-search.png
+  # relative_height = 100
+
+= オートコンプリート：必要なもの
+
+  * マスターテーブル
+    * 候補（例：牛乳）
+    * 候補のヨミ（カタカナ・複数可）
+      * 例1：ギュウニュウ
+      * 例2：ミルク
+
+= オートコンプリート：実装方法
+
+  * 以下の検索のOR
+    * ヨミでの前方一致検索
+    * 候補を緩い全文検索
+  * 候補でソートして提示
+
+(('tag:xx-small'))
+https://pgroonga.github.io/ja/how-to/auto-complete.html
+
+= オートコンプリート\nテーブル定義
+
+  # coderay sql
+
+  CREATE TABLE terms (
+    -- 補完候補
+    term text,
+    -- この候補のヨミ（N個可）
+    readings text[],
+  );
+
+= オートコンプリート：データ例
+
+  # coderay sql
+
+  INSERT INTO terms VALUES (
+    '牛乳', -- 補完候補
+    ARRAY[
+     -- ヨミはカタカナで指定
+     'ギュウニュウ',
+     -- 「ミルク」でも補完可
+     'ミルク'
+    ]
+  );
+
+= オートコンプリート\nデータ管理のポイント
+
+  * 普通のテーブルなので管理が楽
+    * 追加・削除・更新が楽
+    * ダンプ・リストアもいつも通り
+    * レプリケーションもいつも通り
+
+= オートコンプリート\n前方一致用インデックス
+
+  # coderay sql
+
+  CREATE INDEX prefix_search ON terms
+    USING PGroonga
+    -- ...text_array_term_search...
+    (readings pgroonga_text_array_term_search_ops_v2);
+
+= オートコンプリート\n緩い全文検索用
+
+  # coderay sql
+
+  CREATE INDEX loose_search ON terms
+    USING PGroonga (term)
+    -- 緩い全文検索用トークナイザー
+    WITH (tokenizer='TokenBigramSplitSymbolAlphaDigit');
+
+= オートコンプリート\n検索方法
+
+  # coderay sql
+
+  SELECT term FROM terms
+          -- ヨミで前方一致検索
+    WHERE readings &^~ '${入力}' OR
+          -- 緩い全文検索
+          term &@ '${入力}'
+    ORDER BY term LIMIT 10; -- ソート
+
+= オートコンプリート\n検索例：漢字1
+
+  # coderay sql
+
+  -- ユーザーが「牛」を入力した場合
+  SELECT term FROM terms
+          -- ヨミで前方一致検索
+    WHERE readings &^~ '牛' OR
+          -- 緩い全文検索（ヒット）
+          term &@ '牛'
+    ORDER BY term LIMIT 10; -- ソート
+
+= オートコンプリート\n検索例：漢字2
+
+  # coderay sql
+
+  -- ユーザーが「乳」を入力した場合
+  SELECT term FROM terms
+          -- ヨミで前方一致検索
+    WHERE readings &^~ '乳' OR
+          -- 緩い全文検索（ヒット）
+          term &@ '乳'
+    ORDER BY term LIMIT 10; -- ソート
+
+= オートコンプリート\n検索例：カタカナ
+
+  # coderay sql
+
+  -- ユーザーが「ギュウ」を入力した場合
+  SELECT term FROM terms
+       -- ヨミで前方一致検索（ヒット）
+    WHERE readings &^~ 'ギュウ' OR
+          -- 緩い全文検索
+          term &@ 'ギュウ'
+    ORDER BY term LIMIT 10; -- ソート
+
+= オートコンプリート\n検索例：ひらがな
+
+  # coderay sql
+
+  -- ユーザーが「ぎゅう」を入力した場合
+  SELECT term FROM terms
+       -- ヨミで前方一致検索（ヒット）
+    WHERE readings &^~ 'ぎゅう' OR
+          -- 緩い全文検索
+          term &@ 'ぎゅう'
+    ORDER BY term LIMIT 10; -- ソート
+
+= オートコンプリート\n検索例：ローマ字
+
+  # coderay sql
+
+  -- ユーザーが「gyu」を入力した場合
+  SELECT term FROM terms
+       -- ヨミで前方一致検索（ヒット）
+    WHERE readings &^~ 'gyu' OR
+          -- 緩い全文検索
+          term &@ 'gyu'
+    ORDER BY term LIMIT 10; -- ソート
+
+= 同義語展開
+
+  * 同義語
+    * 同じ意味だが表記が異なる語
+    * 例：「牛乳」と「ミルク」
+  * どの表記でもヒットして欲しい
+    * 同義語展開→同義語すべてでOR検索
+
+= 同義語展開\n実装方法
+
+  * 同義語管理テーブルを作成
+  * クエリー内の同義語を展開
+  * 展開後のクエリーで検索
+
+(('tag:xx-small'))
+https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
+
+= 同義語展開：テーブル定義
+
+  # coderay sql
+  CREATE TABLE synonyms (
+    -- 展開対象の語
+    term text,
+    -- 同義語のリスト
+    -- term自身も含める
+    -- 含めない場合はtermが検索禁止語になる
+    terms text[]
+  );
+
+= 同義語展開：データ例
+
+  # coderay sql
+  INSERT INTO synonyms
+    VALUES ('牛乳', -- 「牛乳」を展開
+            ARRAY['牛乳', 'ミルク']),
+           ('ミルク', -- 「ミルク」を展開
+            ARRAY['ミルク', '牛乳']);
+
+= 同義語展開：データ管理のポイント
+
+  * 普通のテーブルなので管理が楽
+    * 追加・削除・更新が楽
+    * ダンプ・リストアもいつも通り
+    * レプリケーションもいつも通り
+
+= 同義語展開：インデックス定義
+
+  # coderay sql
+  CREATE INDEX synonym_search ON synonyms
+    USING PGroonga
+    -- ...text_term_search...
+    -- termで完全一致検索をするため
+    (term pgroonga_text_term_search_ops_v2);
+
+= 同義語展開：確認方法
+
+  # coderay sql
+
+  SELECT pgroonga_query_expand(
+    'synonyms', -- テーブル名
+    'term', -- 展開対象のカラム名
+    'terms', -- 対応する同義語配列のカラム名
+    '牛乳' -- クエリー
+  );
+  -- '((牛乳) OR (ミルク))'
+
+= 同義語展開：検索方法
+
+  # coderay sql
+  SELECT title FROM entries
+    WHERE
+   -- title &@~ 'アイス ((牛乳) OR (ミルク))'になる
+      title &@~
+        pgroonga_query_expand('synonyms',
+                              'term',
+                              'terms',
+                              'アイス 牛乳');
+
+= 類似文書検索
+
+  # image
+  # src = images/php-document-search-similar-search.png
+  # relative_height = 100
+
+= 類似文書検索
+
+  * 検索クエリーは文書そのもの
+    * キーワードではない
+  * 関連エントリーの提示に使える
+    * メタデータがあるなら組み合わせる\n
+      →精度向上
+    * メタデータ：タグ・行動履歴など
+
+= 類似文書検索：実現方法
+
+  * 類似検索用インデックスが必要
+    * 自然言語に合わせた処理で精度向上
+    * 日本語ならMeCabを活用
+  * 類似検索用の演算子を使う
+
+= 類似文書検索：インデックス定義
+
+  # coderay sql
+
+  CREATE INDEX entries_similar_search
+    ON entries
+    -- タイトルと内容を合わせたテキストをインデックス
+    -- 理由1：タイトルも重要→対象に加えて精度向上
+    -- 理由2：PostgreSQLが全文検索インデックスと
+    --        区別できるように
+    USING PGroonga (id, (title || ' ' || content))
+    -- TokenMecabを使うと精度向上
+    WITH (tokenizer='TokenMecab');
+
+= 類似文書検索：検索方法
+
+  # coderay sql
+
+  SELECT title,
+      pgroonga_score(entries) AS score
+    FROM entries
+    WHERE
+      -- &@*で類似文書検索
+      -- 既存文書の内容をそのまま指定
+      (title || ' ' || content) &@*
+        '...Groongaで高速全文検索！...'
+    ORDER BY score DESC LIMIT 3;
+
+= 類似文書検索：結果例
+
+  クエリー：
+     ...Groongaで高速全文検索！...
+
+  ヒット例：
+     ...PGroongaで高速全文検索！...
+
+= おさらい：基本機能
+
+  * 高速全文検索＋ソート
+  * 検索キーワードハイライト
+  * キーワード周辺テキスト表示
+
+= おさらい：高度な機能
+
+  * オートコンプリート
+    * ローマ字対応（zen→全文検索）
+  * 類似文書検索
+  * 同義語展開
+    * 「牛乳」→\n
+      「牛乳 OR ミルク」
+
+= 全文検索システムの実装\n次の一歩
+
+  * 構造化データ対応
+    * オフィス文書・HTMLなど
+  * 対応に必要な処理
+    * テキスト抽出
+    * メタデータ抽出(('note:（例：タイトル・更新日時）'))
+    * スクリーンショット作成(('note:（なおよい）'))
+
+= 抽出ツール
+
+  * Apache Tika
+    * Apache Luceneのサブプロジェクト
+    * 対応フォーマット数が多い
+  * ChupaText
+    * Groongaのサブプロジェクト
+    * スクリーンショット作成対応
+
+= ChupaText
+
+  * 対応フォーマット
+    * Word/Excel/PowerPoint
+    * ODT/ODS/ODP(('note:（OpenDocument）'))
+    * PDF/HTML/XML/CSV/...
+  * インターフェイス
+    * HTTPとコマンドライン
+
+= ChupaText：インストール
+
+  * DockerかVagrantを使うのが楽
+    * (('tag:xx-small'))
+      https://github.com/ranguba/chupa-text-docker
+    * (('tag:xx-small'))
+      https://github.com/ranguba/chupa-text-vagrant
+
+= ChupaText：Docker
+
+  # coderay console
+  % GITHUB=https://github.com
+  % git clone \
+     ${GITHUB}/ranguba/chupa-text-docker.git
+  % cd chupa-text-docker
+  % docker-compose up --build
+
+= ChupaText：使い方
+
+  # coderay console
+  % curl \
+      --form data=@XXX.pdf \
+      http://localhost:20080/extraction.json
+
+= ChupaText：結果例
+
+  # coderay json
+
+  {
+    "mime-type": "application/pdf", # 元データのMIMEタイプ
+    "size": 147159, # メタデータ
+    ...,
+    "texts": [ # 抽出されたテキスト（N個）
+      {
+        "mime-type": "text/plain", # 抽出後のMIMEタイプ
+        ...,
+        "creator": "Adobe Illustrator CS3", # メタデータ
+        "body": "This is sample PDF. ...", # 抽出したテキスト
+        "screenshot": {
+          "mime-type": "image/png", # スクリーンショットのMIMEタイプ
+          "data": "iVBORw...", # Base64にした画像データ
+          "encoding": "base64" # Base64であることを明記
+        }
+      }
+    ]
+  }
+
+= ChupaText：Web UI
+
+  # image
+  # src = images/chupa-text-web-ui-form.png
+  # relative_height = 100
+
+= ChupaText：Web UI抽出例
+
+  # image
+  # src = images/chupa-text-web-ui-extract-metadata.png
+  # relative_height = 100
+
+= ChupaText：Web UI抽出例
+
+  # image
+  # src = images/chupa-text-web-ui-extract-text-and-screenshot.png
+  # relative_height = 100
+
+= ChupaText：Vagrant
+
+  # coderay console
+  % GITHUB=https://github.com
+  % git clone \
+     ${GITHUB}/ranguba/chupa-text-vagrant.git
+  % cd chupa-text-vagrant
+  % vagrant up
+
+(('tag:center'))
+使い方はDocker版と同じ
+
+= ChupaText：活用例
+
+  * 抽出したテキスト
+    * PGroongaへ挿入
+  * 抽出したメタデータ
+    * PGroongaへ挿入
+    * 絞り込みに活用
+  * 作成したスクリーンショット
+    * 検索結果表示時に掲載
+
+= まとめ
+
+  * PostgreSQL経由で\n
+    全文検索エンジン
+    * 採用の判断材料を提供
+  * 全文検索システム実装例を紹介
+    * PGroonga
+  * 構造化データの対応方法を紹介
+    * ChupaText
+
+= 扱わなかった話題
+
+  * 運用について
+    * 障害対策・レプリケーション
+  * チューニング
+  * Groongaの機能を直接使う方法
+
+= サポートサービス紹介
+
+  * 導入支援(('note:（設計支援・性能検証・移行支援・…）'))
+  * 開発支援\n
+    (('note:（サンプルコード提供・問い合わせ対応・…）'))
+  * 運用支援(('note:（障害対応・チューニング支援・…）'))
+
+問い合わせ先：
+
+(('tag:x-small'))
+https://www.clear-code.com/contact/?type=groonga
