@@ -188,7 +188,7 @@ PostgreSQL経由で\n
   * 言語毎にモジュールが必要
     * 英語やフランス語などは組込
     * 日本語は別途必要
-  * 日本語用モジュール
+  * 日本語用モジュールはあるが…
     * 公式にはメンテナンスされていない\n
       (('note:forkして動くようにしている人はいる'))
 
@@ -815,6 +815,8 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
   * 運用について
     * 障害対策・レプリケーション
+    * ロジカルレプリケーションは\n
+      対応済み！
   * チューニング
   * Groongaの機能を直接使う方法
 
