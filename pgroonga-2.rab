@@ -825,9 +825,100 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
   * 運用について
     * 障害対策・レプリケーション
     * ロジカルレプリケーションは\n
-      対応済み！
+      対応済み！(('note:（少しだけ設定方法を紹介）'))
   * チューニング
   * Groongaの機能を直接使う方法
+
+= ロジカルレプリケーション\npostgresql.conf
+
+  # coderay conf
+  # マスター
+  wal_level = logical
+  max_wal_senders = 10
+  max_replication_slots = 10
+
+= ロジカルレプリケーション\nDB作成・PGroongaインストール
+
+  # coderay sql
+  -- マスター
+  CREATE DATABASE test_master;
+  \c test_master
+  CREATE EXTENSION pgroonga;
+
+= ロジカルレプリケーション\nテーブル作成
+
+  # coderay sql
+  -- マスター
+  CREATE TABLE memos (
+    id integer PRIMARY KEY,
+    content text
+  );
+  CREATE INDEX
+    full_text_search_index ON memos
+    USING pgroonga (id, content);
+
+= ロジカルレプリケーション\nレプリケーション用ユーザー作成
+
+  # coderay sql
+  -- マスター
+  -- pg_hba.confも編集すること
+  CREATE ROLE replica
+    WITH REPLICATION
+      LOGIN PASSWORD 'pass';
+  GRANT SELECT
+    ON ALL TABLES IN SCHEMA public
+    TO replica;
+
+= ロジカルレプリケーション\npublication作成
+
+  # coderay sql
+  -- マスター
+  CREATE PUBLICATION pub
+    FOR TABLE memos;
+
+= ロジカルレプリケーション\nDB作成・PGroongaインストール
+
+  # coderay sql
+  -- スレーブ
+  CREATE DATABASE test_slave;
+  \c test_slave
+  CREATE EXTENSION pgroonga;
+
+= ロジカルレプリケーション\nテーブル作成
+
+  # coderay sql
+  -- スレーブ
+  CREATE TABLE memos (
+    id integer PRIMARY KEY,
+    content text
+  );
+  CREATE INDEX
+    full_text_search_index ON memos
+    USING pgroonga (id, content);
+
+= ロジカルレプリケーション\nsubscription作成
+
+  # coderay sql
+  -- スレーブ
+  CREATE SUBSCRIPTION sub
+    CONNECTION
+      'host=192.168.0.18 port=5432
+       user=replica password=pass
+       dbname=test_master'
+    PUBLICATION pub;
+
+= ロジカルレプリケーション\n確認
+
+  # coderay sql
+  -- マスター
+  INSERT INTO memos VALUES (1, '全文検索');
+  -- スレーブ
+  SELECT * FROM memos
+    WHERE content &@~ '全文検索';
+  --  id | content  
+  -- ----+----------
+  --   1 | 全文検索
+  -- (1 row)
 
 = サポートサービス紹介
 
@@ -839,4 +930,4 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 問い合わせ先：
 
 (('tag:x-small'))
-https://www.clear-code.com/contact/?type=groonga
+((<"https://www.clear-code.com/contact/?type=groonga"|URL:https://www.clear-code.com/contact/?type=groonga>))
