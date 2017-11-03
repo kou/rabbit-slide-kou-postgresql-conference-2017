@@ -422,7 +422,7 @@ PostgreSQL経由で\n
   * 候補でソートして提示
 
 (('tag:xx-small'))
-https://pgroonga.github.io/ja/how-to/auto-complete.html
+((<"https://pgroonga.github.io/ja/how-to/auto-complete.html"|URL:https://pgroonga.github.io/ja/how-to/auto-complete.html>))
 
 = オートコンプリート\nテーブル定義
 
@@ -560,7 +560,7 @@ https://pgroonga.github.io/ja/how-to/auto-complete.html
   * 展開後のクエリーで検索
 
 (('tag:xx-small'))
-https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
+((<"https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html"|URL:https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html>))
 
 = 同義語展開：テーブル定義
 
@@ -727,9 +727,9 @@ https://pgroonga.github.io/ja/reference/functions/pgroonga-query-expand.html
 
   * DockerかVagrantを使うのが楽
     * (('tag:xx-small'))
-      https://github.com/ranguba/chupa-text-docker
+      ((<"https://github.com/ranguba/chupa-text-docker"|URL:https://github.com/ranguba/chupa-text-docker>))
     * (('tag:xx-small'))
-      https://github.com/ranguba/chupa-text-vagrant
+      ((<"https://github.com/ranguba/chupa-text-vagrant"|URL:https://github.com/ranguba/chupa-text-vagrant>))
 
 = ChupaText：Docker
 
