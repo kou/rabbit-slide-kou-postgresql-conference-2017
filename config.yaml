@@ -6,6 +6,7 @@ tags:
 - postgresql
 - pgroonga
 - pgcon17j
+- full_text_search
 presentation_date: 2017-11-03
 version: 2017.11.3.3
 licenses:
