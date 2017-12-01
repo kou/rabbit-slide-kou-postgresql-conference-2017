@@ -135,7 +135,7 @@ PostgreSQL経由で\n
 = 全文検索エンジン\nGroonga（ぐるんが）
 
   * 組込可能な全文検索エンジン
-    * PostgreSQLに組込→PGoonga
+    * PostgreSQLに組込→PGroonga
   * 全文検索サーバーとして\n
     単独でも使用可能
     * PostgreSQL＋全文検索サーバー構成\n
